@@ -24,21 +24,71 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'username' => $this->faker->unique()->userName(),
+            'password' => Hash::make('password'),
+            'is_active' => true,
+            'is_staff' => false,
+            'is_super_admin' => false,
             'remember_token' => Str::random(10),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Indicate a specific password for the user.
+     *
+     * @param string $password
+     * @return $this
      */
-    public function unverified(): static
+    public function withPassword(string $password): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'password' => $password,
         ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function staff(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_staff' => true,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an Super Admin.
+     */
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_staff' => true,
+            'is_super_admin' => true,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is inactive.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Configure the model factory.
+     *
+     * We will create a cart for each user after it has been created.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            $user->cart()->create([]);
+        });
     }
 }
