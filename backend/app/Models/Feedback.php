@@ -5,26 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CartItem extends Model
+class Feedback extends Model
 {
     use HasFactory;
 
     public const CREATED_AT = null;
     public const UPDATED_AT = null;
-    
+
     protected $fillable = [
-        'cart_id',
+        'user_id',
         'food_id',
-        'quantity',
+        'comment',
+        'feedback_date',
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
+        'feedback_date' => 'date',
     ];
 
-    public function cart()
+    public function user()
     {
-        return $this->belongsTo(Cart::class);
+        return $this->belongsTo(User::class);
     }
 
     public function food()

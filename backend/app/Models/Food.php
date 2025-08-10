@@ -9,6 +9,9 @@ class Food extends Model
 {
     use HasFactory;
 
+    public const CREATED_AT = null;
+    public const UPDATED_AT = null;
+
     protected $fillable = [
         'name',
         'description',
@@ -20,11 +23,29 @@ class Food extends Model
         'category_id',
     ];
 
-    /**
-     * Get the category that the food item belongs to.
-     */
+    protected $casts = [
+        'is_available' => 'boolean',
+        'stock' => 'integer',
+        'sold' => 'integer',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

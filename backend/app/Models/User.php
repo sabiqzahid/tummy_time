@@ -121,11 +121,13 @@ class User extends Authenticatable
         return $this->is_super_admin;
     }
 
-    /**
-     * Get the cart associated with the user.
-     */
     public function cart()
     {
         return $this->hasOne(Cart::class);
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
     }
 }
