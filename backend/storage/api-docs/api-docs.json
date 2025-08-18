@@ -35,12 +35,12 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john.doe@example.com"
+                                        "example": "sabiq@example.com"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "secret123"
+                                        "example": "Laravel@123"
                                     }
                                 },
                                 "type": "object"
@@ -469,13 +469,270 @@
                 ]
             }
         },
+        "/api/feedbacks/{food_id}": {
+            "get": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Get feedback for a specific food item",
+                "description": "Retrieves all feedback entries for a given food ID.",
+                "operationId": "getFeedbackByFoodId",
+                "parameters": [
+                    {
+                        "name": "food_id",
+                        "in": "path",
+                        "description": "ID of the food item to get feedback for",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of feedback entries",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Feedback"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Food not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/feedbacks": {
+            "post": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Create a new feedback entry",
+                "description": "Creates a new feedback entry for a food item.",
+                "operationId": "createFeedback",
+                "requestBody": {
+                    "description": "Feedback details",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterFeedbackRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Feedback created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Feedback"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/feedbacks/{feedback}": {
+            "delete": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Delete an existing feedback entry",
+                "description": "Deletes an existing feedback entry by its ID. Only the owner or a SuperAdmin can delete the feedback.",
+                "operationId": "deleteFeedback",
+                "parameters": [
+                    {
+                        "name": "feedback",
+                        "in": "path",
+                        "description": "ID of the feedback to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Feedback deleted successfully"
+                    },
+                    "403": {
+                        "description": "Unauthorized action",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Feedback not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Update an existing feedback entry",
+                "description": "Updates an existing feedback entry by its ID. Only the owner can update their feedback.",
+                "operationId": "updateFeedback",
+                "parameters": [
+                    {
+                        "name": "feedback",
+                        "in": "path",
+                        "description": "ID of the feedback to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated feedback comment",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFeedbackRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Feedback updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Feedback"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized action",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Feedback not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/foods": {
             "get": {
                 "tags": [
                     "Food"
                 ],
                 "summary": "Get a paginated list of all food items",
-                "description": "Retrieves a paginated list of all food items. Accessible by any authenticated user.",
+                "description": "Retrieves a paginated list of all food items with optional filtering by category and searching by name. Accessible by any authenticated user.",
                 "operationId": "getFoodsList",
                 "parameters": [
                     {
@@ -496,6 +753,24 @@
                         "schema": {
                             "type": "integer",
                             "default": 10
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter food by category name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search food by name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -699,6 +974,64 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/foods/most-sold": {
+            "get": {
+                "tags": [
+                    "Food"
+                ],
+                "summary": "Get a paginated list of food items sorted by most sold (SuperAdmin only)",
+                "operationId": "9771efb5c416016656d9a46cb838924d",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FoodWithCountPagination"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1064,6 +1397,645 @@
                 ]
             }
         },
+        "/api/orders": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get a list of all orders for the current user or all orders for staff/admin",
+                "operationId": "22d21713fd1e12635d9297e93c85a1ba",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderPagination"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Create a new order from the user's cart",
+                "operationId": "287b2135ca42e747b87b227ba9843d32",
+                "responses": {
+                    "201": {
+                        "description": "Order created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order created successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cart not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/orders/new": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get a list of new orders (Staff/Admin only)",
+                "operationId": "d3efd84dd0031d0f253b1ed7a545651d",
+                "parameters": [
+                    {
+                        "name": "order_status",
+                        "in": "query",
+                        "description": "Filter new orders by status (e.g., pending)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order_id",
+                        "in": "query",
+                        "description": "Search for a specific order by ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NewOrderPagination"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/orders/{order}": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get details for a specific order",
+                "operationId": "56013558ff3ad5d7cf47f83c80e80e9e",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "ID of the order to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderWithItems"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Delete a specific order (owner only)",
+                "operationId": "cbb9a5cd8bba6212a822bf4294fb1801",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "ID of the order to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Update the status of a specific order",
+                "operationId": "db8ace98eb9f8b14fba75cbe764c72f3",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "ID of the order to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_status"
+                                ],
+                                "properties": {
+                                    "order_status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "preparing",
+                                            "ready",
+                                            "picked",
+                                            "delivered",
+                                            "cancelled"
+                                        ],
+                                        "example": "ready"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/payments": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Get a list of payments, optionally filtered by order",
+                "description": "Retrieves a paginated list of all payments. SuperAdmins can see all payments, while other users can only see their own. An optional order_id query parameter can be used to filter payments.",
+                "operationId": "getPaymentsList",
+                "parameters": [
+                    {
+                        "name": "order_id",
+                        "in": "query",
+                        "description": "Filter payments by a specific order ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentPagination"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create a new payment",
+                "description": "Creates a new payment for a specified order. The authenticated user must own the order.",
+                "operationId": "createPayment",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterPaymentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payment created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "string",
+                                            "example": "Payment successful."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Not authorized to create a payment for this order.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/payments/{payment}": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Get a single payment by ID",
+                "description": "Retrieves a specific payment record by its ID. Users can only access their own payments unless they are a SuperAdmin.",
+                "operationId": "getPaymentById",
+                "parameters": [
+                    {
+                        "name": "payment",
+                        "in": "path",
+                        "description": "ID of the payment to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: You are not authorized to view this payment.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Delete a payment",
+                "description": "Deletes a specific payment by its ID. Only SuperAdmins are authorized to perform this action.",
+                "operationId": "deletePayment",
+                "parameters": [
+                    {
+                        "name": "payment",
+                        "in": "path",
+                        "description": "ID of the payment to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Payment deleted successfully. No content returned."
+                    },
+                    "403": {
+                        "description": "Forbidden: Not authorized to delete this payment.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/cart-items/{user_id}": {
             "get": {
                 "tags": [
@@ -1143,89 +2115,7 @@
             }
         },
         "/api/cart-items/{cart_id}": {
-            "delete": {
-                "tags": [
-                    "Cart"
-                ],
-                "summary": "Delete all items from a user's cart",
-                "description": "Removes all cart items from a specific cart by its ID. Requires the authenticated user to be the cart owner.",
-                "operationId": "deleteCartItems",
-                "parameters": [
-                    {
-                        "name": "cart_id",
-                        "in": "path",
-                        "description": "ID of the cart to clear",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Cart items deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "string",
-                                            "example": "Successfully deleted 3 cart item(s)."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden: You are not authorized to delete this cart.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found: Cart not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "patch": {
+            "put": {
                 "tags": [
                     "Cart"
                 ],
@@ -1292,6 +2182,88 @@
                     },
                     "422": {
                         "description": "Validation Error: Invalid input.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Delete all items from a user's cart",
+                "description": "Removes all cart items from a specific cart by its ID. Requires the authenticated user to be the cart owner.",
+                "operationId": "deleteCartItems",
+                "parameters": [
+                    {
+                        "name": "cart_id",
+                        "in": "path",
+                        "description": "ID of the cart to clear",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Cart items deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "string",
+                                            "example": "Successfully deleted 3 cart item(s)."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: You are not authorized to delete this cart.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found: Cart not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1989,6 +2961,113 @@
     },
     "components": {
         "schemas": {
+            "ErrorResponse": {
+                "title": "Error Response",
+                "description": "Standard error response format for generic errors (e.g., 401, 403, 404, 500)",
+                "properties": {
+                    "errors": {
+                        "description": "Error message",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "errors": "Something went wrong."
+                }
+            },
+            "SuccessResponse": {
+                "title": "Success Response",
+                "description": "Standard success response format for updates and deletes",
+                "properties": {
+                    "success": {
+                        "description": "Success message",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "success": "Operation successful."
+                }
+            },
+            "User": {
+                "title": "User",
+                "description": "User model",
+                "properties": {
+                    "id": {
+                        "description": "User ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "first_name": {
+                        "description": "User's first name",
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "description": "User's last name",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "User's email address",
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "username": {
+                        "description": "User's unique username",
+                        "type": "string"
+                    },
+                    "is_staff": {
+                        "description": "Indicates if the user has admin privileges",
+                        "type": "boolean"
+                    },
+                    "is_active": {
+                        "description": "Indicates if the user account is active",
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "description": "Timestamp of user creation",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Timestamp of last update",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "id": 1,
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "email": "john.doe@example.com",
+                    "username": "johndoe",
+                    "is_staff": false,
+                    "is_active": true,
+                    "created_at": "2023-01-01T12:00:00.000000Z",
+                    "updated_at": "2023-01-01T12:00:00.000000Z"
+                }
+            },
+            "UserPagination": {
+                "title": "User Pagination",
+                "description": "Paginated list of users",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/User"
+                        }
+                    },
+                    "links": {
+                        "description": "Pagination links",
+                        "type": "object"
+                    },
+                    "meta": {
+                        "description": "Pagination meta information",
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "Category": {
                 "title": "Category",
                 "description": "Category model",
@@ -2086,16 +3165,6 @@
                         "description": "URL of the food item's image",
                         "type": "string",
                         "nullable": true
-                    },
-                    "created_at": {
-                        "description": "Timestamp of food item creation",
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "description": "Timestamp of last update",
-                        "type": "string",
-                        "format": "date-time"
                     }
                 },
                 "type": "object",
@@ -2108,10 +3177,26 @@
                     "is_available": true,
                     "stock": 50,
                     "sold": 20,
-                    "image_url": "http://localhost:8000/storage/food_images/burger.jpg",
-                    "created_at": "2023-01-01T12:00:00.000000Z",
-                    "updated_at": "2023-01-01T12:00:00.000000Z"
+                    "image_url": "http://localhost:8000/storage/food_images/burger.jpg"
                 }
+            },
+            "FoodWithCount": {
+                "title": "FoodWithCount",
+                "description": "Food model with a count of related order items",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Food"
+                    },
+                    {
+                        "properties": {
+                            "order_items_count": {
+                                "description": "The number of times this food item has been ordered.",
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
             },
             "FoodPagination": {
                 "title": "Food Pagination",
@@ -2121,6 +3206,27 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Food"
+                        }
+                    },
+                    "links": {
+                        "description": "Pagination links",
+                        "type": "object"
+                    },
+                    "meta": {
+                        "description": "Pagination meta information",
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "FoodWithCountPagination": {
+                "title": "Food with Count Pagination",
+                "description": "Paginated list of food items including their order count",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FoodWithCount"
                         }
                     },
                     "links": {
@@ -2199,10 +3305,6 @@
                     "items"
                 ],
                 "properties": {
-                    "cart_id": {
-                        "description": "ID of the cart to update",
-                        "type": "integer"
-                    },
                     "items": {
                         "description": "List of new cart items",
                         "type": "array",
@@ -2223,55 +3325,57 @@
                 },
                 "type": "object",
                 "example": {
-                    "cart_id": 1,
                     "items": [
                         {
-                            "food_id": 101,
+                            "food_id": 1,
                             "quantity": 2
                         },
                         {
-                            "food_id": 205,
+                            "food_id": 2,
                             "quantity": 1
                         }
                     ]
                 }
             },
-            "User": {
-                "title": "User",
-                "description": "User model",
+            "Order": {
+                "title": "Order",
+                "description": "Order model",
                 "properties": {
                     "id": {
-                        "description": "User ID",
+                        "description": "Order ID",
                         "type": "integer",
                         "format": "int64"
                     },
-                    "first_name": {
-                        "description": "User's first name",
-                        "type": "string"
+                    "user_id": {
+                        "description": "ID of the user who placed the order",
+                        "type": "integer",
+                        "format": "int64"
                     },
-                    "last_name": {
-                        "description": "User's last name",
-                        "type": "string"
-                    },
-                    "email": {
-                        "description": "User's email address",
+                    "order_date": {
+                        "description": "Date and time of the order",
                         "type": "string",
-                        "format": "email"
+                        "format": "date-time"
                     },
-                    "username": {
-                        "description": "User's unique username",
-                        "type": "string"
+                    "total_amount": {
+                        "description": "Total amount of the order",
+                        "type": "number",
+                        "format": "float"
                     },
-                    "is_staff": {
-                        "description": "Indicates if the user has admin privileges",
-                        "type": "boolean"
-                    },
-                    "is_active": {
-                        "description": "Indicates if the user account is active",
-                        "type": "boolean"
+                    "order_status": {
+                        "description": "Current status of the order",
+                        "type": "string",
+                        "default": "pending",
+                        "enum": [
+                            "pending",
+                            "preparing",
+                            "ready",
+                            "picked",
+                            "delivered",
+                            "cancelled"
+                        ]
                     },
                     "created_at": {
-                        "description": "Timestamp of user creation",
+                        "description": "Timestamp of order creation",
                         "type": "string",
                         "format": "date-time"
                     },
@@ -2284,24 +3388,148 @@
                 "type": "object",
                 "example": {
                     "id": 1,
-                    "first_name": "John",
-                    "last_name": "Doe",
-                    "email": "john.doe@example.com",
-                    "username": "johndoe",
-                    "is_staff": false,
-                    "is_active": true,
+                    "user_id": 10,
+                    "order_date": "2023-01-01T12:00:00.000000Z",
+                    "total_amount": 25.75,
+                    "order_status": "pending",
                     "created_at": "2023-01-01T12:00:00.000000Z",
                     "updated_at": "2023-01-01T12:00:00.000000Z"
                 }
             },
-            "UserPagination": {
-                "title": "User Pagination",
-                "description": "Paginated list of users",
+            "OrderItem": {
+                "title": "OrderItem",
+                "description": "Order item model",
+                "properties": {
+                    "id": {
+                        "description": "Order item ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "order_id": {
+                        "description": "ID of the associated order",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "food_id": {
+                        "description": "ID of the associated food item",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "quantity": {
+                        "description": "Quantity of the food item",
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "description": "Timestamp of creation",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Timestamp of last update",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "id": 1,
+                    "order_id": 1,
+                    "food_id": 101,
+                    "quantity": 2,
+                    "created_at": "2023-01-01T12:00:00.000000Z",
+                    "updated_at": "2023-01-01T12:00:00.000000Z"
+                }
+            },
+            "OrderWithItems": {
+                "title": "OrderWithItems",
+                "description": "Order model with associated order items",
+                "example": {
+                    "id": 1,
+                    "user_id": 10,
+                    "order_date": "2023-01-01T12:00:00.000000Z",
+                    "total_amount": 25.75,
+                    "order_status": "pending",
+                    "created_at": "2023-01-01T12:00:00.000000Z",
+                    "updated_at": "2023-01-01T12:00:00.000000Z",
+                    "order_items": [
+                        {
+                            "id": 1,
+                            "order_id": 1,
+                            "food_id": 101,
+                            "quantity": 2,
+                            "created_at": "2023-01-01T12:00:00.000000Z",
+                            "updated_at": "2023-01-01T12:00:00.000000Z"
+                        }
+                    ]
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Order"
+                    },
+                    {
+                        "properties": {
+                            "order_items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OrderItem"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "NewOrder": {
+                "title": "NewOrder",
+                "description": "New order model",
+                "properties": {
+                    "id": {
+                        "description": "New order ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "order_id": {
+                        "description": "ID of the associated order",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "created_at": {
+                        "description": "Timestamp of creation",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Timestamp of last update",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "order": {
+                        "$ref": "#/components/schemas/Order"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "id": 1,
+                    "order_id": 1,
+                    "created_at": "2023-01-01T12:00:00.000000Z",
+                    "updated_at": "2023-01-01T12:00:00.000000Z",
+                    "order": {
+                        "id": 1,
+                        "user_id": 10,
+                        "order_date": "2023-01-01T12:00:00.000000Z",
+                        "total_amount": 25.75,
+                        "order_status": "pending"
+                    }
+                }
+            },
+            "OrderPagination": {
+                "title": "Order Pagination",
+                "description": "Paginated list of orders",
                 "properties": {
                     "data": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/User"
+                            "$ref": "#/components/schemas/Order"
                         }
                     },
                     "links": {
@@ -2315,18 +3543,206 @@
                 },
                 "type": "object"
             },
-            "ErrorResponse": {
-                "title": "Error Response",
-                "description": "Standard error response format for generic errors (e.g., 401, 403, 404, 500)",
+            "NewOrderPagination": {
+                "title": "New Order Pagination",
+                "description": "Paginated list of new orders",
                 "properties": {
-                    "errors": {
-                        "description": "Error message",
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NewOrder"
+                        }
+                    },
+                    "links": {
+                        "description": "Pagination links",
+                        "type": "object"
+                    },
+                    "meta": {
+                        "description": "Pagination meta information",
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Payment": {
+                "title": "Payment",
+                "description": "Payment model",
+                "properties": {
+                    "id": {
+                        "description": "Payment ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "user_id": {
+                        "description": "ID of the user who made the payment",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "order_id": {
+                        "description": "ID of the associated order",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "payment_type": {
+                        "description": "Type of payment",
+                        "type": "string",
+                        "enum": [
+                            "cash",
+                            "card"
+                        ]
+                    },
+                    "payment_date": {
+                        "description": "Date and time of the payment",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "id": 1,
+                    "user_id": 1,
+                    "order_id": 10,
+                    "payment_type": "cash",
+                    "payment_date": "2023-01-01T13:00:00.000000Z"
+                }
+            },
+            "PaymentPagination": {
+                "title": "Payment Pagination",
+                "description": "Paginated list of payments",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Payment"
+                        }
+                    },
+                    "links": {
+                        "description": "Pagination links",
+                        "type": "object"
+                    },
+                    "meta": {
+                        "description": "Pagination meta information",
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterPaymentRequest": {
+                "title": "RegisterPaymentRequest",
+                "description": "Request body for creating a new payment",
+                "required": [
+                    "order_id",
+                    "payment_type"
+                ],
+                "properties": {
+                    "order_id": {
+                        "description": "ID of the order to be paid",
+                        "type": "integer"
+                    },
+                    "payment_type": {
+                        "description": "Type of payment",
+                        "type": "string",
+                        "enum": [
+                            "cash",
+                            "card"
+                        ]
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "order_id": 1,
+                    "payment_type": "cash"
+                }
+            },
+            "Feedback": {
+                "title": "Feedback",
+                "description": "Feedback model",
+                "properties": {
+                    "id": {
+                        "description": "Feedback ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "user_id": {
+                        "description": "ID of the user who provided feedback",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "food_id": {
+                        "description": "ID of the associated food item",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "comment": {
+                        "description": "The feedback comment",
+                        "type": "string"
+                    },
+                    "feedback_date": {
+                        "description": "Timestamp of the feedback",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "id": 1,
+                    "user_id": 10,
+                    "food_id": 20,
+                    "comment": "This food was excellent, highly recommend!",
+                    "feedback_date": "2023-01-01T14:30:00.000000Z"
+                }
+            },
+            "FeedbackList": {
+                "title": "FeedbackList",
+                "description": "List of feedback items",
+                "properties": {
+                    "feedbacks": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Feedback"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterFeedbackRequest": {
+                "title": "RegisterFeedbackRequest",
+                "description": "Request body for creating a new feedback entry",
+                "required": [
+                    "food_id",
+                    "comment"
+                ],
+                "properties": {
+                    "food_id": {
+                        "description": "ID of the food item being commented on",
+                        "type": "integer"
+                    },
+                    "comment": {
+                        "description": "The feedback comment",
                         "type": "string"
                     }
                 },
                 "type": "object",
                 "example": {
-                    "errors": "Something went wrong."
+                    "food_id": 1,
+                    "comment": "This food was excellent, highly recommend!"
+                }
+            },
+            "UpdateFeedbackRequest": {
+                "title": "UpdateFeedbackRequest",
+                "description": "Request body for updating a feedback entry",
+                "required": [
+                    "comment"
+                ],
+                "properties": {
+                    "comment": {
+                        "description": "The updated feedback comment",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "comment": "The updated comment."
                 }
             }
         },
@@ -2338,6 +3754,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Users",
+            "description": "API Endpoints for User Management"
+        },
         {
             "name": "Category",
             "description": "API Endpoints for Category Management"
@@ -2351,8 +3771,16 @@
             "description": "API Endpoints for Cart Management"
         },
         {
-            "name": "Users",
-            "description": "API Endpoints for User Management"
+            "name": "Orders",
+            "description": "API Endpoints for Orders Management"
+        },
+        {
+            "name": "Payments",
+            "description": "API Endpoints for Payment Management"
+        },
+        {
+            "name": "Feedback",
+            "description": "API Endpoints for Feedback Management"
         }
     ]
 }

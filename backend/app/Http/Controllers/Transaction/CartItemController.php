@@ -11,67 +11,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\OpenApi\Annotations as OA;
 
-/**
- * @OA\Tag(
- * name="Cart",
- * description="API Endpoints for Cart Management"
- * )
- *
- * @OA\Schema(
- * schema="CartItem",
- * title="CartItem",
- * description="Cart item model",
- * @OA\Property(property="id", type="integer", format="int64", description="Cart item ID"),
- * @OA\Property(property="cart_id", type="integer", format="int64", description="ID of the associated cart"),
- * @OA\Property(property="food_id", type="integer", format="int64", description="ID of the associated food item"),
- * @OA\Property(property="quantity", type="integer", description="Quantity of the food item"),
- * @OA\Property(property="created_at", type="string", format="date-time", description="Timestamp of creation"),
- * @OA\Property(property="updated_at", type="string", format="date-time", description="Timestamp of last update"),
- * example={
- * "id": 1,
- * "cart_id": 1,
- * "food_id": 101,
- * "quantity": 2,
- * "created_at": "2023-01-01T12:00:00.000000Z",
- * "updated_at": "2023-01-01T12:00:00.000000Z"
- * }
- * )
- *
- * @OA\Schema(
- * schema="CartItemList",
- * title="CartItemList",
- * description="List of cart items",
- * @OA\Property(
- * property="cartItems",
- * type="array",
- * @OA\Items(ref="#/components/schemas/CartItem")
- * )
- * )
- *
- * @OA\Schema(
- * schema="UpdateCartItemRequest",
- * title="UpdateCartItemRequest",
- * description="Request body for updating cart items",
- * required={"cart_id", "items"},
- * @OA\Property(property="cart_id", type="integer", description="ID of the cart to update"),
- * @OA\Property(
- * property="items",
- * type="array",
- * @OA\Items(
- * @OA\Property(property="food_id", type="integer", description="ID of the food item"),
- * @OA\Property(property="quantity", type="integer", description="Quantity of the food item")
- * ),
- * description="List of new cart items"
- * ),
- * example={
- * "cart_id": 1,
- * "items": {
- * {"food_id": 101, "quantity": 2},
- * {"food_id": 205, "quantity": 1}
- * }
- * }
- * )
- */
 class CartItemController extends Controller
 {
     public function __construct() {
@@ -137,11 +76,11 @@ class CartItemController extends Controller
                 ], 404);
             }
 
-            $cartItems = CartItem::where('cart_id', $cart->id)->get();
+            $cartItems = CartItem::with(['food' => function ($query) {
+                $query->select('id', 'name');
+            }])->where('cart_id', $cart->id)->get();
             
-            return response()->json([
-                'cartItems' => $cartItems,
-            ], 200);
+            return response()->json($cartItems, 200);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json([
@@ -151,7 +90,7 @@ class CartItemController extends Controller
     }
 
     /**
-     * @OA\Patch(
+     * @OA\Put(
      * path="/api/cart-items/{cart_id}",
      * operationId="updateCartItems",
      * tags={"Cart"},
@@ -205,7 +144,13 @@ class CartItemController extends Controller
 
         $cart = Cart::find($cartId);
 
-        if (!$cart || $cart->user_id !== Auth::id()) {
+        if (!$cart) {
+            return response()->json([
+                'error' => 'Cart not found.',
+            ], 404);
+        }
+
+        if ($cart->user_id !== Auth::id()) {
             return response()->json([
                 'error' => 'You are not authorized to update this cart.',
             ], 403);
@@ -217,11 +162,9 @@ class CartItemController extends Controller
             $newCartItems = [];
             foreach ($validated['items'] as $item) {
                 $newCartItems[] = [
-                    'cart_id' => $cartId,
+                    'cart_id' => $cart->id,
                     'food_id' => $item['food_id'],
                     'quantity' => $item['quantity'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ];
             }
             
@@ -255,7 +198,7 @@ class CartItemController extends Controller
      * description="ID of the cart to clear"
      * ),
      * @OA\Response(
-     * response=200,
+     * response=204,
      * description="Cart items deleted successfully",
      * @OA\JsonContent(
      * @OA\Property(property="success", type="string", example="Successfully deleted 3 cart item(s).")
@@ -298,9 +241,7 @@ class CartItemController extends Controller
         try {
             $deletedCount = CartItem::where('cart_id', $cartId)->delete();
             
-            return response()->json([
-                'success' => "Successfully deleted $deletedCount cart item(s).",
-            ], 200);
+            return response()->json(null, 204);
 
         } catch (\Exception $e) {
             Log::error($e->getMessage());

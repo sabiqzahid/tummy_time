@@ -15,37 +15,6 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Traits\AuthenticateUser;
 use App\OpenApi\Annotations as OA;
 
-/**
- * @OA\Schema(
- * schema="User",
- * title="User",
- * description="User model",
- * @OA\Property(property="id", type="integer", format="int64", description="User ID"),
- * @OA\Property(property="first_name", type="string", description="User's first name"),
- * @OA\Property(property="last_name", type="string", description="User's last name"),
- * @OA\Property(property="email", type="string", format="email", description="User's email address"),
- * @OA\Property(property="username", type="string", description="User's unique username"),
- * @OA\Property(property="is_staff", type="boolean", description="Indicates if the user has admin privileges"),
- * @OA\Property(property="is_active", type="boolean", description="Indicates if the user account is active"),
- * @OA\Property(property="created_at", type="string", format="date-time", description="Timestamp of user creation"),
- * @OA\Property(property="updated_at", type="string", format="date-time", description="Timestamp of last update"),
- * example={
- * "id": 1, "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com",
- * "username": "johndoe", "is_staff": false, "is_active": true, 
- * "created_at": "2023-01-01T12:00:00.000000Z", "updated_at": "2023-01-01T12:00:00.000000Z"
- * }
- * )
- *
- * @OA\Schema(
- * schema="UserPagination",
- * title="User Pagination",
- * description="Paginated list of users",
- * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/User")),
- * @OA\Property(property="links", type="object", description="Pagination links"),
- * @OA\Property(property="meta", type="object", description="Pagination meta information")
- * )
- *
- */
 class UserController extends Controller
 {
     use AuthenticateUser;
@@ -125,7 +94,7 @@ class UserController extends Controller
      * operationId="getUserByIdOrSlug",
      * tags={"Users"},
      * summary="Get user details by ID or slug",
-     * description="Retrieves the details of a specific user by their ID or slug. A user can view their own profile, or an admin can view any user's profile. Includes portfolio links if the user is a 'provider'.",
+     * description="Retrieves the details of a specific user by their ID or slug.",
      * security={{"sanctum": {}}},
      * @OA\Parameter(
      * name="user",
@@ -180,12 +149,6 @@ class UserController extends Controller
 
             if (!$foundUser) {
                 return response()->json(['errors' => 'User not found'], 404);
-            }
-
-            if (Auth::user()->id !== $foundUser->id && !Auth::user()->isSuperAdmin()) {
-                return response()->json([
-                    "errors" => "You are not authorized to view this user."
-                ], 403);
             }
 
             return response()->json($foundUser, 200);

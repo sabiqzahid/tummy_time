@@ -13,6 +13,7 @@ class Payment extends Model
     public const UPDATED_AT = null;
 
     protected $fillable = [
+        'user_id',
         'order_id',
         'payement_type',
         'payment_date',

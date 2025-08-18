@@ -24,8 +24,8 @@ class AuthController extends Controller
      * required=true,
      * @OA\JsonContent(
      * required={"email", "password"},
-     * @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
-     * @OA\Property(property="password", type="string", format="password", example="secret123"),
+     * @OA\Property(property="email", type="string", format="email", example="sabiq@example.com"),
+     * @OA\Property(property="password", type="string", format="password", example="Laravel@123"),
      * )
      * ),
      * @OA\Response(
@@ -66,9 +66,19 @@ class AuthController extends Controller
     
             // Create token with 24-hour expiry
             $token = $user->createToken('auth_token', ['*'], now()->addHours(24))->plainTextToken;
+
+            $role = 'user';
+
+            if ($user->is_staff) {
+                $role = 'staff';
+            } elseif ($user->is_super_admin) {
+                $role = 'admin';
+            }
     
             return response()->json([
                 'token' => $token,
+                'user_id' => $user->id,
+                'user_role' => $role,
                 'token_type' => 'Bearer',
                 'expires_at' => now()->addHours(24)->toDateTimeString(),
             ]);

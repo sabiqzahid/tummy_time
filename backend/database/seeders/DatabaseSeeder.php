@@ -53,8 +53,9 @@ class DatabaseSeeder extends Seeder
             $order->total_amount = $totalAmount;
             $order->save();
 
-            if ($order->payment_status === 'paid' && $order->order_status === 'completed') {
+            if ($order->payment_status === 'paid' && $order->order_status === 'delivered') {
                 $order->payment()->create([
+                    'user_id' => $order->user_id,
                     'payment_type' => rand(0, 1) ? 'cash' : 'card',
                     'payment_date' => $order->order_date,
                 ]);

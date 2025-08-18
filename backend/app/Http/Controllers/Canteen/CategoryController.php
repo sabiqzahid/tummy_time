@@ -10,37 +10,6 @@ use App\Models\Category;
 use App\Http\Requests\Canteen\RegisterCategoryRequest;
 use App\OpenApi\Annotations as OA;
 
-/**
- * @OA\Tag(
- * name="Category",
- * description="API Endpoints for Category Management"
- * )
- *
- * @OA\Schema(
- * schema="Category",
- * title="Category",
- * description="Category model",
- * @OA\Property(property="id", type="integer", format="int64", description="Category ID"),
- * @OA\Property(property="name", type="string", description="Category name"),
- * @OA\Property(property="created_at", type="string", format="date-time", description="Timestamp of category creation"),
- * @OA\Property(property="updated_at", type="string", format="date-time", description="Timestamp of last update"),
- * example={
- * "id": 1,
- * "name": "Beverages",
- * "created_at": "2023-01-01T12:00:00.000000Z",
- * "updated_at": "2023-01-01T12:00:00.000000Z"
- * }
- * )
- *
- * @OA\Schema(
- * schema="CategoryPagination",
- * title="Category Pagination",
- * description="Paginated list of categories",
- * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Category")),
- * @OA\Property(property="links", type="object", description="Pagination links"),
- * @OA\Property(property="meta", type="object", description="Pagination meta information")
- * )
- */
 class CategoryController extends Controller
 {
     public function __construct()
@@ -137,10 +106,10 @@ class CategoryController extends Controller
      * )
      * )
      */
-    public function show(string $id)
+    public function show(string $category)
     {
         try {
-            $foundCategory = Category::where('id', $id)->first();
+            $foundCategory = Category::find($category);
 
             if (!$foundCategory) {
                 return response()->json(['errors' => 'Category not found'], 404);
@@ -276,10 +245,10 @@ class CategoryController extends Controller
      * )
      * )
      */
-    public function destroy(string $id)
+    public function destroy(string $category)
     {
         try {
-            $foundCategory = Category::where('id', $id)->first();
+            $foundCategory = Category::find($category);
 
             if (!$foundCategory) {
                 return response()->json([

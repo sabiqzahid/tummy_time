@@ -22,7 +22,6 @@ class UpdateCartItemRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'cart_id' => ['required', 'exists:carts,id'],
             'items' => ['required', 'array'],
             'items.*.food_id' => ['required', 'exists:food,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -35,8 +34,6 @@ class UpdateCartItemRequest extends BaseRequest
     public function messages(): array
     {
         return [
-            'cart_id.required' => 'The cart ID is required.',
-            'cart_id.exists' => 'The selected cart ID does not exist.',
             'items.required' => 'The items list is required.',
             'items.array' => 'The items must be an array.',
             'items.*.food_id.required' => 'Each cart item must have a food ID.',

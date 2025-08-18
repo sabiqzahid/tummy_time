@@ -13,55 +13,10 @@ use App\Http\Requests\Canteen\RegisterFoodRequest;
 use App\Http\Requests\Canteen\UpdateFoodRequest;
 use App\OpenApi\Annotations as OA;
 
-
-/**
- * @OA\Tag(
- * name="Food",
- * description="API Endpoints for Food Management"
- * )
- *
- * @OA\Schema(
- * schema="Food",
- * title="Food",
- * description="Food item model",
- * @OA\Property(property="id", type="integer", format="int64", description="Food ID"),
- * @OA\Property(property="category_id", type="integer", format="int64", description="ID of the associated category"),
- * @OA\Property(property="name", type="string", description="Name of the food item"),
- * @OA\Property(property="description", type="string", nullable=true, description="Description of the food item"),
- * @OA\Property(property="price", type="number", format="float", description="Price of the food item"),
- * @OA\Property(property="is_available", type="boolean", description="Availability status of the food item"),
- * @OA\Property(property="stock", type="integer", description="Current stock quantity"),
- * @OA\Property(property="sold", type="integer", description="Number of units sold"),
- * @OA\Property(property="image_url", type="string", nullable=true, description="URL of the food item's image"),
- * @OA\Property(property="created_at", type="string", format="date-time", description="Timestamp of food item creation"),
- * @OA\Property(property="updated_at", type="string", format="date-time", description="Timestamp of last update"),
- * example={
- * "id": 1,
- * "category_id": 2,
- * "name": "Burger",
- * "description": "A delicious beef patty with lettuce and tomatoes.",
- * "price": 10.50,
- * "is_available": true,
- * "stock": 50,
- * "sold": 20,
- * "image_url": "http://localhost:8000/storage/food_images/burger.jpg",
- * "created_at": "2023-01-01T12:00:00.000000Z",
- * "updated_at": "2023-01-01T12:00:00.000000Z"
- * }
- * )
- *
- * @OA\Schema(
- * schema="FoodPagination",
- * title="Food Pagination",
- * description="Paginated list of food items",
- * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Food")),
- * @OA\Property(property="links", type="object", description="Pagination links"),
- * @OA\Property(property="meta", type="object", description="Pagination meta information")
- * )
- */
 class FoodController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth:sanctum');
     }
 
@@ -101,7 +56,7 @@ class FoodController extends Controller
      * operationId="getFoodsList",
      * tags={"Food"},
      * summary="Get a paginated list of all food items",
-     * description="Retrieves a paginated list of all food items. Accessible by any authenticated user.",
+     * description="Retrieves a paginated list of all food items with optional filtering by category, availability, searching by name, and sorting by price. Accessible by any authenticated user.",
      * security={{"sanctum": {}}},
      * @OA\Parameter(
      * name="page",
@@ -116,6 +71,37 @@ class FoodController extends Controller
      * description="Number of items per page",
      * required=false,
      * @OA\Schema(type="integer", default=10)
+     * ),
+     * @OA\Parameter(
+     * name="category",
+     * in="query",
+     * description="Filter food by category name",
+     * required=false,
+     * @OA\Schema(type="string")
+     * ),
+     * @OA\Parameter(
+     * name="search",
+     * in="query",
+     * description="Search food by name",
+     * required=false,
+     * @OA\Schema(type="string")
+     * ),
+     * @OA\Parameter(
+     * name="is_available",
+     * in="query",
+     * description="Filter by availability (true/false)",
+     * required=false,
+     * @OA\Schema(type="boolean")
+     * ),
+     * @OA\Parameter(
+     * name="sort_by_price",
+     * in="query",
+     * description="Sort by price (asc or desc)",
+     * required=false,
+     * @OA\Schema(
+     * type="string",
+     * enum={"asc", "desc"}
+     * )
      * ),
      * @OA\Response(
      * response=200,
@@ -134,18 +120,93 @@ class FoodController extends Controller
      * )
      * )
      */
-    public function index():JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $foods = Food::paginate(10);
+            $query = Food::query();
+
+            if ($request->has('category')) {
+                $categoryName = $request->input('category');
+                $query->whereHas('category', function ($q) use ($categoryName) {
+                    $q->where('name', $categoryName);
+                });
+            }
+
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $query->where('name', 'like', '%' . $searchTerm . '%');
+            }
+
+            if ($request->has('is_available')) {
+                $isAvailable = filter_var($request->input('is_available'), FILTER_VALIDATE_BOOLEAN);
+                $query->where('is_available', $isAvailable);
+            }
+
+            if ($request->has('sort_by_price')) {
+                $sortDirection = $request->input('sort_by_price', 'asc');
+                $query->orderBy('price', $sortDirection);
+            }
+
+            $foods = $query->paginate(10);
+
             return response()->json($foods, 200);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'An error occurred while fetching food items.'
             ], 500);
         }
     }
+
+    /**
+     * @OA\Get(
+     * path="/api/foods/most-sold",
+     * summary="Get a paginated list of food items sorted by most sold (SuperAdmin only)",
+     * tags={"Food"},
+     * security={{"sanctum": {}}},
+     * @OA\Parameter(
+     * name="page",
+     * in="query",
+     * description="Page number for pagination",
+     * required=false,
+     * @OA\Schema(type="integer", default=1)
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Successful operation",
+     * @OA\JsonContent(ref="#/components/schemas/FoodWithCountPagination")
+     * ),
+     * @OA\Response(
+     * response=403,
+     * description="Forbidden",
+     * @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     * ),
+     * @OA\Response(
+     * response=500,
+     * description="Internal server error",
+     * @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     * )
+     * )
+     */
+    public function indexMostSold(Request $request): JsonResponse
+    {
+        if (!Auth::user()->isSuperAdmin()) {
+           return response()->json([
+               'error' => 'You are not authorized to view these food items.'
+           ]);
+        }
+
+        try {
+            $foods = Food::withCount('orderItems')->orderByDesc('order_items_count')->paginate(10);
+            return response()->json($foods, 200);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json([
+                'error' => 'An error occurred while fetching food items.'
+            ], 500);
+        }
+    }
+
 
     /**
      * @OA\Get(
@@ -184,10 +245,10 @@ class FoodController extends Controller
      * )
      * )
      */
-    public function show(string $id):JsonResponse
+    public function show(string $food): JsonResponse
     {
         try {
-            $foundFood = Food::find($id);
+            $foundFood = Food::find($food);
 
             if (!$foundFood) {
                 return response()->json([
@@ -274,7 +335,7 @@ class FoodController extends Controller
      * )
      * )
      */
-    public function create(RegisterFoodRequest $request):JsonResponse
+    public function create(RegisterFoodRequest $request): JsonResponse
     {
         if (!Auth::user()->isSuperAdmin()) {
             return response()->json([
@@ -381,19 +442,19 @@ class FoodController extends Controller
      * )
      * )
      */
-    public function update(UpdateFoodRequest $request, string $id):JsonResponse
+    public function update(UpdateFoodRequest $request, string $food): JsonResponse
     {
         if (!Auth::user()->isSuperAdmin()) {
             return response()->json([
-                'error' => 'You are not authorized to update a food',
+                'error' => 'You are not authorized to update this food',
             ], 403);
         }
 
         $validated = $request->validated();
 
         try {
-            $foundFood = Food::find($id);
-            \Log::info($request->all());
+            $foundFood = Food::find($food);
+
             if (!$foundFood) {
                 return response()->json([
                     'error' => 'Food not found',
@@ -459,16 +520,16 @@ class FoodController extends Controller
      * )
      * )
      */
-    public function destroy(string $id):JsonResponse
+    public function destroy(string $food): JsonResponse
     {
         if (!Auth::user()->isSuperAdmin()) {
             return response()->json([
-                'error' => 'You are not authorized to update a food',
+                'error' => 'You are not authorized to delete this food',
             ], 403);
         }
 
         try {
-            $foundFood = Food::find($id);
+            $foundFood = Food::find($food);
 
             if (!$foundFood) {
                 return response()->json([
@@ -480,9 +541,7 @@ class FoodController extends Controller
 
             $foundFood->delete();
 
-            return response()->json([
-                'success' => 'Food deleted successfully',
-            ], 200);
+            return response()->json(null, 204);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json([
