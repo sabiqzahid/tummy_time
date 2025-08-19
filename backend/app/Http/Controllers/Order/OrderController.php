@@ -350,10 +350,15 @@ class OrderController extends Controller
                 ], 404);
             }
 
+            \Log::info($validated['order_status']);
+            \Log::info(!Auth::user()->isSuperAdmin());
+            \Log::info(!Auth::user()->isStaff());
+            \Log::info($order->user_id !== Auth::user()->id);
+            \Log::info($validated['order_status'] !== 'cancelled');
             if (
                 (!Auth::user()->isSuperAdmin() && !Auth::user()->isStaff() &&
-                $order->user_id !== Auth::user()->id &&
-                $validated['order_status'] !== 'cancelled') ||
+                ($order->user_id !== Auth::user()->id ||
+                $validated['order_status'] !== 'cancelled')) ||
                 ((Auth::user()->isSuperAdmin() || Auth::user()->isStaff()) &&
                 $validated['order_status'] === 'cancelled')
             ) {

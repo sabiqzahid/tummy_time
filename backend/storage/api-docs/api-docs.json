@@ -732,7 +732,7 @@
                     "Food"
                 ],
                 "summary": "Get a paginated list of all food items",
-                "description": "Retrieves a paginated list of all food items with optional filtering by category and searching by name. Accessible by any authenticated user.",
+                "description": "Retrieves a paginated list of all food items with optional filtering by category, availability, searching by name, and sorting by price. Accessible by any authenticated user.",
                 "operationId": "getFoodsList",
                 "parameters": [
                     {
@@ -771,6 +771,28 @@
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "is_available",
+                        "in": "query",
+                        "description": "Filter by availability (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "sort_by_price",
+                        "in": "query",
+                        "description": "Sort by price (asc or desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
                         }
                     }
                 ],
@@ -2516,7 +2538,7 @@
                     "Users"
                 ],
                 "summary": "Get user details by ID or slug",
-                "description": "Retrieves the details of a specific user by their ID or slug. A user can view their own profile, or an admin can view any user's profile. Includes portfolio links if the user is a 'provider'.",
+                "description": "Retrieves the details of a specific user by their ID or slug.",
                 "operationId": "getUserByIdOrSlug",
                 "parameters": [
                     {

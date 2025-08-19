@@ -69,10 +69,10 @@ class AuthController extends Controller
 
             $role = 'user';
 
-            if ($user->is_staff) {
+            if ($user->is_super_admin) {
+                $role = 'super_admin';
+            } elseif ($user->is_staff) {
                 $role = 'staff';
-            } elseif ($user->is_super_admin) {
-                $role = 'admin';
             }
     
             return response()->json([
