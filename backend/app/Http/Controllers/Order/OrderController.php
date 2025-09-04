@@ -42,9 +42,9 @@ class OrderController extends Controller
     public function index()
     {
         try {
-            $orders = Auth::user()->isStaff() || Auth::user()->isSuperAdmin() ? 
-                        Order::paginate(10) : 
-                        Order::where('user_id', Auth::user()->id)->paginate(10);
+            $orders = Auth::user()->isStaff() || Auth::user()->isSuperAdmin() ?
+                        Order::orderByDesc('order_date')->orderByDesc('id')->paginate(10) :
+                        Order::where('user_id', Auth::user()->id)->orderByDesc('order_date')->orderByDesc('id')->paginate(10);
 
             return response()->json($orders, 200);
         } catch (\Exception $e) {
@@ -54,7 +54,6 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
     /**
      * @OA\Get(
      * path="/api/orders/new",
@@ -113,7 +112,11 @@ class OrderController extends Controller
                 $query->where('order_id', $orderId);
             }
             
-            $newOrders = $query->paginate(10);
+            $newOrders = $query->join('orders', 'new_orders.order_id', '=', 'orders.id')
+                            ->orderByDesc('orders.order_date')
+                            ->orderByDesc('new_orders.id')
+                            ->select('new_orders.*')
+                            ->paginate(10);
             
             return response()->json($newOrders, 200);
         } catch (\Exception $e) {
@@ -225,12 +228,12 @@ class OrderController extends Controller
     public function create(Request $request)
     {
         try {
-            DB::transaction(function () {
+            DB::transaction(callback: function () {
                 $user = Auth::user();
 
                 $cart = Cart::where('user_id', $user->id)
-                            ->with('cartItems.food')
-                            ->first();
+                    ->with('cartItems.food')
+                    ->first();
 
                 if (!$cart) {
                     throw new \Exception('Cart not found.');
@@ -242,9 +245,18 @@ class OrderController extends Controller
 
                 $totalAmount = 0;
                 foreach ($cart->cartItems as $cartItem) {
-                    // Checking if food exists and has a price, to prevent errors
                     if ($cartItem->food) {
-                        $totalAmount += $cartItem->quantity * $cartItem->food->price;
+                        $food = $cartItem->food;
+
+                        // Check if food is available and has enough stock
+                        if (!$food->is_available) {
+                            throw new \Exception($food->name . ' is not available.');
+                        }
+                        if ($food->stock < $cartItem->quantity) {
+                            throw new \Exception('Not enough stock for ' . $food->name);
+                        }
+
+                        $totalAmount += $cartItem->quantity * $food->price;
                     }
                 }
 
@@ -260,34 +272,49 @@ class OrderController extends Controller
                         'food_id' => $cartItem->food_id,
                         'quantity' => $cartItem->quantity,
                     ]);
+
+                    // Update stock and sold count
+                    $food = $cartItem->food;
+                    $food->stock -= $cartItem->quantity;
+                    $food->sold += $cartItem->quantity;
+
+                    // Set is_available to false if stock is 0
+                    if ($food->stock <= 0) {
+                        $food->is_available = false;
+                    }
+                    $food->save();
                 }
 
                 NewOrder::create(['order_id' => $order->id]);
-
                 $cart->cartItems()->delete();
             });
+            $order = Order::where('user_id', Auth::user()->id)->orderByDesc('order_date')->orderByDesc('id')->first();
 
             return response()->json([
-                'message' => 'Order created successfully.'
+                'order_id' => $order->id,
+                'success' => 'Order created successfully.'
             ], 201);
         } catch (\Exception $e) {
             Log::error($e);
 
             if ($e->getMessage() === 'Cart not found.') {
-                return response()->json([
-                    "errors" => "Cart not found."
-                ], 404);
+                return response()->json(["errors" => "Cart not found."], 404);
             }
 
             if ($e->getMessage() === 'Cart item is empty.') {
-                return response()->json([
-                    "errors" => "Cart item is empty."
-                ], 400);
+                return response()->json(["errors" => "Cart item is empty."], 400);
+            }
+            
+            // Handle new specific exceptions
+            if (str_contains($e->getMessage(), 'is not available')) {
+                return response()->json(["errors" => $e->getMessage()], 400);
             }
 
-            return response()->json([
-                "errors" => $e->getMessage()
-            ], 500);
+            if (str_contains($e->getMessage(), 'Not enough stock')) {
+                return response()->json(["errors" => $e->getMessage()], 400);
+            }
+
+            return response()->json(["errors" => $e->getMessage()], 500);
         }
     }
 
@@ -342,7 +369,7 @@ class OrderController extends Controller
     {
         $validated = $request->validated();
         try {
-            $order = Order::find($order);
+            $order = Order::with('orderItems.food')->find($order);
 
             if (!$order) {
                 return response()->json([
@@ -350,16 +377,12 @@ class OrderController extends Controller
                 ], 404);
             }
 
-            \Log::info($validated['order_status']);
-            \Log::info(!Auth::user()->isSuperAdmin());
-            \Log::info(!Auth::user()->isStaff());
-            \Log::info($order->user_id !== Auth::user()->id);
-            \Log::info($validated['order_status'] !== 'cancelled');
             if (
                 (!Auth::user()->isSuperAdmin() && !Auth::user()->isStaff() &&
-                ($order->user_id !== Auth::user()->id ||
-                $validated['order_status'] !== 'cancelled')) ||
+                $order->user_id !== Auth::user()->id &&
+                $validated['order_status'] !== 'cancelled') ||
                 ((Auth::user()->isSuperAdmin() || Auth::user()->isStaff()) &&
+                $order->user_id !== Auth::user()->id &&
                 $validated['order_status'] === 'cancelled')
             ) {
                 return response()->json([
@@ -367,25 +390,33 @@ class OrderController extends Controller
                 ], 403);
             }
 
-            if (
-                $validated['order_status'] === 'delivered' ||
-                $validated['order_status'] === 'cancelled'
-            ) {
-                if ($validated['order_status'] === 'delivered') {
-                    $payment = Payment::where('order_id', $order->id)->first();
-
-                    if (!$payment) {
-                        return response()->json([
-                            "errors" => "Payment not found."
-                        ], 404);
+            // Add back to stock if order is cancelled
+            if ($validated['order_status'] === 'cancelled') {
+                foreach ($order->orderItems as $orderItem) {
+                    if ($orderItem->food) {
+                        $food = $orderItem->food;
+                        $food->stock += $orderItem->quantity;
+                        $food->sold -= $orderItem->quantity; // Decrement sold count as well
+                        $food->is_available = true; // Set to true since it's now back in stock
+                        $food->save();
                     }
-
-                    $order->payment_status = 'paid';
-                } else {
-                    $order->payment_status = 'failed';
                 }
-                
+                $order->payment_status = 'failed';
+            }
 
+            if ($validated['order_status'] === 'delivered') {
+                $payment = Payment::where('order_id', $order->id)->first();
+
+                if (!$payment) {
+                    return response()->json([
+                        "errors" => "Payment not found."
+                    ], 404);
+                }
+
+                $order->payment_status = 'paid';
+            }
+
+            if ($validated['order_status'] === 'delivered' || $validated['order_status'] === 'cancelled') {
                 $newOrder = NewOrder::where('order_id', $order->id)->first();
 
                 if ($newOrder) {

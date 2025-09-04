@@ -1,0 +1,210 @@
+.container {
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-top: 5rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error {
+  background-color: #fee;
+  color: #c33;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #fcc;
+}
+
+.success {
+  background-color: rgb(170, 224, 183);
+  color: rgb(30, 122, 30);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid rgb(170, 224, 183);
+}
+
+.emptyCart {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.emptyCart h2 {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.shopButton {
+  background-color: #ff6b35;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.shopButton:hover {
+  background-color: #e55a2b;
+}
+
+.orderSummary {
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+.items {
+  margin-bottom: 20px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemName {
+  flex: 1;
+  font-weight: 500;
+}
+
+.itemQuantity {
+  color: #666;
+  margin: 0 16px;
+}
+
+.itemPrice {
+  font-weight: 600;
+  color: #ff6b35;
+}
+
+.total {
+  text-align: right;
+  font-size: 18px;
+  padding-top: 16px;
+  border-top: 2px solid #ddd;
+}
+
+.paymentMethods {
+  margin-bottom: 32px;
+}
+
+.methodButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.methodButton {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.methodButton:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 4px 8px rgba(255, 107, 53, 0.1);
+}
+
+.methodIcon {
+  font-size: 32px;
+  margin-right: 16px;
+}
+
+.methodText h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.methodText p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.backButton {
+  background: #ff6b35;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-start;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.backButton:hover {
+  background: #e55a2b;
+}
+
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .methodButtons {
+    gap: 12px;
+  }
+
+  .methodButton {
+    padding: 16px;
+  }
+
+  .methodIcon {
+    font-size: 24px;
+    margin-right: 12px;
+  }
+}
+

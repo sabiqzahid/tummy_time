@@ -134,7 +134,7 @@ class FoodController extends Controller
 
             if ($request->has('search')) {
                 $searchTerm = $request->input('search');
-                $query->where('name', 'like', '%' . $searchTerm . '%');
+                $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($searchTerm) . '%']);
             }
 
             if ($request->has('is_available')) {
@@ -248,7 +248,7 @@ class FoodController extends Controller
     public function show(string $food): JsonResponse
     {
         try {
-            $foundFood = Food::find($food);
+            $foundFood = Food::with('category')->find($food);
 
             if (!$foundFood) {
                 return response()->json([
@@ -285,7 +285,6 @@ class FoodController extends Controller
      * @OA\Property(property="description", type="string", nullable=true, example="A classic Indian rice dish with spicy chicken."),
      * @OA\Property(property="price", type="number", format="float", example=15.99),
      * @OA\Property(property="stock", type="integer", example=100),
-     * @OA\Property(property="is_available", type="boolean", example=true),
      * @OA\Property(property="image_url", type="string", nullable=true, description="URL of the food item's image.")
      * )
      * ),
@@ -298,7 +297,6 @@ class FoodController extends Controller
      * @OA\Property(property="description", type="string", nullable=true, example="A classic Indian rice dish with spicy chicken."),
      * @OA\Property(property="price", type="number", format="float", example=15.99),
      * @OA\Property(property="stock", type="integer", example=100),
-     * @OA\Property(property="is_available", type="boolean", example=true),
      * @OA\Property(property="image_url", type="string", format="binary", nullable=true, description="Image file for the food item.")
      * )
      * )
@@ -347,6 +345,10 @@ class FoodController extends Controller
 
         $this->imageHandler($request, $validated);
 
+        if ($validated['stock'] <= 0) {
+            $validated['is_available'] = false;
+        }
+
         try {
             Food::create($validated);
 
@@ -387,7 +389,6 @@ class FoodController extends Controller
      * @OA\Property(property="description", type="string", nullable=true, example="Updated description."),
      * @OA\Property(property="price", type="number", format="float", nullable=true, example=16.50),
      * @OA\Property(property="stock", type="integer", nullable=true, example=75),
-     * @OA\Property(property="is_available", type="boolean", nullable=true, example=false),
      * @OA\Property(property="image_url", type="string", nullable=true, description="URL of the new image, or 'null' to remove.")
      * )
      * ),
@@ -399,7 +400,6 @@ class FoodController extends Controller
      * @OA\Property(property="description", type="string", nullable=true, example="Updated description."),
      * @OA\Property(property="price", type="number", format="float", nullable=true, example=16.50),
      * @OA\Property(property="stock", type="integer", nullable=true, example=75),
-     * @OA\Property(property="is_available", type="boolean", nullable=true, example=false),
      * @OA\Property(property="image_url", type="string", format="binary", nullable=true, description="New image file for the food item. Send 'null' to delete the existing image."),
      * @OA\Property(property="_method", type="string", default="PATCH", description="Method spoofing for form data.")
      * )
@@ -451,6 +451,7 @@ class FoodController extends Controller
         }
 
         $validated = $request->validated();
+        \Log::info($validated);
 
         try {
             $foundFood = Food::find($food);
@@ -462,6 +463,10 @@ class FoodController extends Controller
             }
 
             $this->imageHandler($request, $validated, $foundFood);
+
+            if ($validated['stock'] <= 0) {
+                $validated['is_available'] = false;
+            }
 
             $foundFood->update($validated);
 

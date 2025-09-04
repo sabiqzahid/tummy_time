@@ -77,10 +77,13 @@ class CartItemController extends Controller
             }
 
             $cartItems = CartItem::with(['food' => function ($query) {
-                $query->select('id', 'name');
+                $query->select('id', 'name', 'price');
             }])->where('cart_id', $cart->id)->get();
             
-            return response()->json($cartItems, 200);
+            return response()->json([
+                'cart_id' => $cart->id,
+                'cart_items' => $cartItems,
+            ], 200);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json([

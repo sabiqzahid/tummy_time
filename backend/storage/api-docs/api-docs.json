@@ -164,28 +164,6 @@
                 "summary": "Get a paginated list of all categories",
                 "description": "Retrieves a paginated list of all categories. Accessible by any authenticated user.",
                 "operationId": "getCategoriesList",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number for pagination",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 10
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -877,10 +855,6 @@
                                         "type": "integer",
                                         "example": 100
                                     },
-                                    "is_available": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
                                     "image_url": {
                                         "description": "URL of the food item's image.",
                                         "type": "string",
@@ -921,10 +895,6 @@
                                     "stock": {
                                         "type": "integer",
                                         "example": 100
-                                    },
-                                    "is_available": {
-                                        "type": "boolean",
-                                        "example": true
                                     },
                                     "image_url": {
                                         "description": "Image file for the food item.",
@@ -1270,11 +1240,6 @@
                                         "example": 75,
                                         "nullable": true
                                     },
-                                    "is_available": {
-                                        "type": "boolean",
-                                        "example": false,
-                                        "nullable": true
-                                    },
                                     "image_url": {
                                         "description": "URL of the new image, or 'null' to remove.",
                                         "type": "string",
@@ -1311,11 +1276,6 @@
                                     "stock": {
                                         "type": "integer",
                                         "example": 75,
-                                        "nullable": true
-                                    },
-                                    "is_available": {
-                                        "type": "boolean",
-                                        "example": false,
                                         "nullable": true
                                     },
                                     "image_url": {

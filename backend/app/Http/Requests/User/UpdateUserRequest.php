@@ -4,6 +4,7 @@ namespace App\Http\Requests\User;
 
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
+use App\Rules\StrongPassword;
 
 class UpdateUserRequest extends BaseRequest
 {
@@ -28,6 +29,7 @@ class UpdateUserRequest extends BaseRequest
             'first_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
             'username' => ['nullable', 'string', 'max:255', Rule::unique('users', 'username')->ignore($userId)],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed', new StrongPassword()],
         ];
     }
 
@@ -35,6 +37,7 @@ class UpdateUserRequest extends BaseRequest
     {
         return [
             'username.unique' => 'The username is already taken by another user.',
+            'password.confirmed' => 'The password confirmation does not match.',
         ];
     }
 }

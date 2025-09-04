@@ -191,7 +191,9 @@ class FeedbackController extends Controller
 
             $feedback->update($validated);
 
-            return response()->json($feedback, 200);
+            return response()->json([
+                'success' => 'Feedback updated successfully.',
+            ],200);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json([

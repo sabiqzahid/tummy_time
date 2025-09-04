@@ -25,20 +25,6 @@ class CategoryController extends Controller
      * summary="Get a paginated list of all categories",
      * description="Retrieves a paginated list of all categories. Accessible by any authenticated user.",
      * security={{"sanctum": {}}},
-     * @OA\Parameter(
-     * name="page",
-     * in="query",
-     * description="Page number for pagination",
-     * required=false,
-     * @OA\Schema(type="integer", default=1)
-     * ),
-     * @OA\Parameter(
-     * name="per_page",
-     * in="query",
-     * description="Number of items per page",
-     * required=false,
-     * @OA\Schema(type="integer", default=10)
-     * ),
      * @OA\Response(
      * response=200,
      * description="Successful operation",
@@ -59,7 +45,7 @@ class CategoryController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $categories = Category::paginate(10);
+            $categories = Category::all();
             return response()->json($categories, 200);
         } catch (\Exception $e) {
             Log::error($e);

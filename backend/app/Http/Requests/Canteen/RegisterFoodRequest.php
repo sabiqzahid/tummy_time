@@ -44,13 +44,12 @@ class RegisterFoodRequest extends BaseRequest
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric'],
             'stock' => ['required', 'integer'],
-            'is_available' => ['required', 'boolean'],
             'image_url' => [
                 'nullable',
                 'image',
                 'mimes:jpeg,png,jpg', // Allowed MIME types
-                'max:2048', // Max File Size in KB
-                Rule::dimensions()->maxWidth(1000)->maxHeight(1000), // Optional: Max dimensions
+                'max:5120', // Max File Size in KB
+                Rule::dimensions()->maxWidth(3000)->maxHeight(3000), // Optional: Max dimensions
             ],
         ];
     }
@@ -59,9 +58,9 @@ class RegisterFoodRequest extends BaseRequest
     {
         return [
             'image_url.image' => 'The file must be an image.',
-            'image_url.max' => 'The image may not be greater than 2MB.',
+            'image_url.max' => 'The image may not be greater than 5MB.',
             'image_url.mimes' => 'The image must be a file of type: jpeg, png, jpg.',
-            'image_url.dimensions' => 'The image dimensions are too large (max 1000x1000 pixels).',
+            'image_url.dimensions' => 'The image dimensions are too large (max 3000x3000 pixels).',
         ];
     }
 }

@@ -194,6 +194,8 @@ class PaymentController extends Controller
             $validated['user_id'] = Auth::user()->id;
             $validated['payment_date'] = now();
             Payment::create($validated);
+            
+            $order->update(['payment_status' => 'paid']);
 
             return response()->json([
                 "success" => "Payment successful."
