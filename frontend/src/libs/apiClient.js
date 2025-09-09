@@ -2,9 +2,25 @@ import { getTokenFromSession } from "./cookie";
 
 export class ApiClient {
   constructor(baseURL) {
+    if (ApiClient.instance) {
+      console.log("🔄 Returning existing ApiClient singleton instance");
+      return ApiClient.instance;
+    }
+    
+    console.log("🆕 Creating new ApiClient singleton instance with URL:", baseURL);
     this.baseURL = baseURL;
+    ApiClient.instance = this;
   }
 
+  static getInstance(baseURL) {
+    if (!ApiClient.instance) {
+      console.log("📞 getInstance() creating new instance");
+      ApiClient.instance = new ApiClient(baseURL);
+    } else {
+      console.log("📞 getInstance() returning existing instance");
+    }
+    return ApiClient.instance;
+  }
   async handleErrors(response) {
     const contentType = response.headers.get("Content-Type") || "";
     // const clonedResponse = response.clone();

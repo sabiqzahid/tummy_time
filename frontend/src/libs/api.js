@@ -1,7 +1,7 @@
 import { ApiClient } from "./apiClient";
 
 const API_URL = process.env.API_BASE_URL;
-const apiClient = new ApiClient(API_URL);
+const apiClient = ApiClient.getInstance(API_URL);
 
 // API functions
 export const login = async (data) => {
