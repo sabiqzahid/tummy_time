@@ -11,7 +11,7 @@ export function LoginButton() {
 
   return (
     <button type="submit" disabled={pending} className={styles.loginButton}>
-      {pending ? "Logging in..." : "Login"}
+      {pending ? "Logging ..." : "Login"}
     </button>
   )
 }
